@@ -15,8 +15,10 @@
  */
 package org.destinationsol.game.ship.hulls;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+import org.destinationsol.assets.Assets;
 import org.destinationsol.common.Immutable;
 import org.destinationsol.game.item.Engine;
 import org.destinationsol.game.particle.DSParticleEmitter;
@@ -27,11 +29,16 @@ import java.util.List;
 
 @Immutable
 public class HullConfig {
-    private final Data data;
+    private Data data;
+    private DataWithTex dataWithTex;
+    private DataWithAnim dataWithAnim;
+    private static boolean usingTex = false;
 
-    public HullConfig(Data configData) {
-        this.data = new Data(configData);
+    public HullConfig(DataWithTex configData) {
+        this.dataWithTex = new DataWithTex(configData);
     }
+    public HullConfig(DataWithAnim configData) { this.dataWithAnim = new DataWithAnim(configData);}
+    public HullConfig(Data configData) { this.data = new Data(configData); }
 
     private static List<Vector2> deepCopyOf(List<Vector2> src) {
         List<Vector2> returnList = new ArrayList<>(src.size());
@@ -44,96 +51,168 @@ public class HullConfig {
     }
 
     public String getInternalName() {
-        return data.internalName;
+        if (usingTex) {
+            return dataWithTex.internalName;
+        }
+        return dataWithAnim.internalName;
     }
 
     public float getSize() {
-        return data.size;
+        if (usingTex) {
+            return dataWithTex.size;
+        }
+        return dataWithAnim.size;
     }
 
     public int getMaxLife() {
-        return data.maxLife;
+        if (usingTex) {
+            return dataWithTex.maxLife;
+        }
+        return dataWithAnim.maxLife;
     }
 
     public GunSlot getGunSlot(int slotNr) {
-        return data.gunSlots.get(slotNr);
+
+        if (usingTex) {
+            return dataWithTex.gunSlots.get(slotNr);
+        }
+        return dataWithAnim.gunSlots.get(slotNr);
     }
 
     public int getNrOfGunSlots() {
-        return data.gunSlots.size();
+
+        if (usingTex) {
+            return dataWithTex.gunSlots.size();
+        }
+        return dataWithAnim.gunSlots.size();
     }
 
     public List<GunSlot> getGunSlotList() {
-        return new ArrayList<>(data.gunSlots);
+        if (usingTex) {
+            return new ArrayList<>(dataWithTex.gunSlots);
+        }
+        return new ArrayList<>(dataWithAnim.gunSlots);
     }
 
     public List<DSParticleEmitter> getParticleEmitters() {
-        return new ArrayList<>(data.particleEmitters);
+        if (usingTex) {
+            return new ArrayList<>(dataWithTex.particleEmitters);
+        }
+        return new ArrayList<>(dataWithAnim.particleEmitters);
     }
 
     public List<Vector2> getLightSourcePositions() {
-        return deepCopyOf(data.lightSrcPoss);
+        if (usingTex) {
+            return new ArrayList<>(dataWithTex.lightSrcPoss);
+        }
+        return new ArrayList<>(dataWithAnim.lightSrcPoss);
     }
 
     public float getDurability() {
-        return data.durability;
+        if (usingTex) {
+            return dataWithTex.durability;
+        }
+        return dataWithAnim.durability;
     }
 
     public boolean hasBase() {
-        return data.hasBase;
+        if (usingTex) {
+            return dataWithTex.hasBase;
+        }
+        return dataWithAnim.hasBase;
     }
 
     public List<Vector2> getForceBeaconPositions() {
-        return deepCopyOf(data.forceBeaconPoss);
+
+        if (usingTex) {
+            return deepCopyOf(dataWithTex.forceBeaconPoss);
+        }
+        return deepCopyOf(dataWithAnim.forceBeaconPoss);
     }
 
     public List<Vector2> getDoorPositions() {
-        return deepCopyOf(data.doorPoss);
+        if (usingTex) {
+            return deepCopyOf(dataWithTex.doorPoss);
+        }
+        return deepCopyOf(dataWithAnim.doorPoss);
     }
 
     public TextureAtlas.AtlasRegion getIcon() {
-        return new TextureAtlas.AtlasRegion(data.icon);
+        if (usingTex) {
+            return new TextureAtlas.AtlasRegion(dataWithTex.icon);
+        }
+        return new TextureAtlas.AtlasRegion(dataWithAnim.icon);
     }
 
     public Type getType() {
-        return data.type;
+        if (usingTex) {
+            return dataWithTex.type;
+        }
+        return dataWithAnim.type;
     }
 
     public TextureAtlas.AtlasRegion getTexture() {
-        return new TextureAtlas.AtlasRegion(data.tex);
+        return new TextureAtlas.AtlasRegion(dataWithTex.tex);
     }
 
     public Engine.Config getEngineConfig() {
-        return data.engineConfig;
+        if (usingTex) {
+            return dataWithTex.engineConfig;
+        }
+        return dataWithAnim.engineConfig;
     }
 
     public AbilityConfig getAbility() {
-        return data.ability;
+        if (usingTex) {
+            return dataWithTex.ability;
+        }
+        return dataWithAnim.ability;
     }
 
     public float getApproxRadius() {
-        return data.approxRadius;
+        if (usingTex) {
+            return dataWithTex.approxRadius;
+        }
+        return dataWithAnim.approxRadius;
     }
 
     public String getDisplayName() {
-        return data.displayName;
+        if (usingTex) {
+            return dataWithTex.displayName;
+        }
+        return dataWithAnim.displayName;
     }
 
     public float getPrice() {
-        return data.price;
+        if (usingTex) {
+            return dataWithTex.price;
+        }
+        return dataWithAnim.price;
     }
 
     public float getHirePrice() {
-        return data.hirePrice;
+        if (usingTex) {
+            return dataWithTex.hirePrice;
+        }
+        return dataWithAnim.hirePrice;
     }
 
     public Vector2 getOrigin() {
-        return new Vector2(data.origin);
+
+        if (usingTex) {
+            return new Vector2(dataWithTex.origin);
+        }
+        return new Vector2(dataWithAnim.origin);
     }
 
     public Vector2 getShipBuilderOrigin() {
-        return new Vector2(data.shipBuilderOrigin);
+        if (usingTex) {
+            return new Vector2(dataWithTex.shipBuilderOrigin);
+        }
+        return new Vector2(dataWithAnim.shipBuilderOrigin);
     }
+
+    public ArrayList<Texture> getTextures() { return dataWithAnim.textures; }
 
     public enum Type {
         STD("std"),
@@ -157,8 +236,7 @@ public class HullConfig {
         }
     }
 
-    public final static class Data {
-
+    public static class Data {
         public String internalName;
         public float size;
         public int maxLife;
@@ -171,23 +249,31 @@ public class HullConfig {
         public List<Vector2> doorPoss = new ArrayList<>();
         public TextureAtlas.AtlasRegion icon;
         public Type type;
-        public TextureAtlas.AtlasRegion tex;
         public Engine.Config engineConfig;
         public AbilityConfig ability;
         public float approxRadius;
         public String displayName;
         public float price;
         public float hirePrice;
+        public boolean hasTex;
+        public TextureAtlas.AtlasRegion tex;
         // origin is the value after it has been processed
         public Vector2 origin = new Vector2();
         // shipBuilderOrigin is the vector loaded from the file
         public Vector2 shipBuilderOrigin = new Vector2();
 
         public Data() {
-
         }
 
         public Data(Data src) {
+            try {
+                this.tex = new TextureAtlas.AtlasRegion(src.tex);
+                this.hasTex = true;
+                usingTex = true;
+            } catch (Exception e) {
+                this.hasTex = false;
+                usingTex = false;
+            }
             this.internalName = src.internalName;
             this.size = src.size;
             this.maxLife = src.maxLife;
@@ -198,7 +284,70 @@ public class HullConfig {
             this.doorPoss = deepCopyOf(src.doorPoss);
             this.icon = new TextureAtlas.AtlasRegion(src.icon);
             this.type = src.type;
+            this.engineConfig = src.engineConfig;
+            this.ability = src.ability;
+            this.approxRadius = src.approxRadius;
+            this.displayName = src.displayName;
+            this.price = src.price;
+            this.hirePrice = src.hirePrice;
+            this.origin = new Vector2(src.origin);
+            this.shipBuilderOrigin = new Vector2(src.shipBuilderOrigin);
+            this.gunSlots.addAll(src.gunSlots);
+            this.particleEmitters.addAll(src.particleEmitters);
+        }
+    }
+    public final static class DataWithTex extends Data {
+        public TextureAtlas.AtlasRegion tex;
+        public DataWithTex() {
+            this.hasTex = true;
+        }
+        public DataWithTex(DataWithTex src) {
+            this.hasTex = true;
+            usingTex = true;
             this.tex = new TextureAtlas.AtlasRegion(src.tex);
+            this.internalName = src.internalName;
+            this.size = src.size;
+            this.maxLife = src.maxLife;
+            this.lightSrcPoss = deepCopyOf(src.lightSrcPoss);
+            this.durability = src.durability;
+            this.hasBase = src.hasBase;
+            this.forceBeaconPoss = deepCopyOf(src.forceBeaconPoss);
+            this.doorPoss = deepCopyOf(src.doorPoss);
+            this.icon = new TextureAtlas.AtlasRegion(src.icon);
+            this.type = src.type;
+            this.engineConfig = src.engineConfig;
+            this.ability = src.ability;
+            this.approxRadius = src.approxRadius;
+            this.displayName = src.displayName;
+            this.price = src.price;
+            this.hirePrice = src.hirePrice;
+            this.origin = new Vector2(src.origin);
+            this.shipBuilderOrigin = new Vector2(src.shipBuilderOrigin);
+            this.gunSlots.addAll(src.gunSlots);
+            this.particleEmitters.addAll(src.particleEmitters);
+        }
+    }
+    public final static class DataWithAnim extends Data {
+        public ArrayList<Texture> textures;
+
+        public DataWithAnim() {
+            this.hasTex = false;
+        }
+
+        public DataWithAnim(DataWithAnim src) {
+            usingTex = false;
+            this.textures = src.textures;
+            this.hasTex = false;
+            this.internalName = src.internalName;
+            this.size = src.size;
+            this.maxLife = src.maxLife;
+            this.lightSrcPoss = deepCopyOf(src.lightSrcPoss);
+            this.durability = src.durability;
+            this.hasBase = src.hasBase;
+            this.forceBeaconPoss = deepCopyOf(src.forceBeaconPoss);
+            this.doorPoss = deepCopyOf(src.doorPoss);
+            this.icon = new TextureAtlas.AtlasRegion(src.icon);
+            this.type = src.type;
             this.engineConfig = src.engineConfig;
             this.ability = src.ability;
             this.approxRadius = src.approxRadius;

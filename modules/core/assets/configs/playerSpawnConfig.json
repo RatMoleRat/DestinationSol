@@ -4,6 +4,11 @@
 	    "items": "3*rep core:lightArmor-1 core:smallShield-1 core:blaster-1",
 	    "money": 20
     },
+    "Anim Test": {
+      "hull": "core:animationTest",
+      "items": "3*rep core:lightArmor-1 core:smallShield-1 core:blaster-1",
+      "money": 100
+    },
 
     "Loaded Imperial Large": {
         "hull": "core:imperialBig",

@@ -15,9 +15,16 @@
  */
 package org.destinationsol.files;
 
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import jdk.nashorn.internal.parser.JSONParser;
 import org.destinationsol.assets.Assets;
 import org.destinationsol.assets.json.Json;
 import org.destinationsol.common.SolException;
@@ -34,18 +41,24 @@ import org.destinationsol.game.ship.Teleport;
 import org.destinationsol.game.ship.UnShield;
 import org.destinationsol.game.ship.hulls.GunSlot;
 import org.destinationsol.game.ship.hulls.HullConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.FileHandler;
 
 public final class HullConfigManager {
     private final ItemManager itemManager;
     private final AbilityCommonConfigs abilityCommonConfigs;
     private final Map<String, HullConfig> nameToConfigMap;
     private final Map<HullConfig, String> configToNameMap;
+    private static final Logger logger = LoggerFactory.getLogger(HullConfigManager.class);
 
     public HullConfigManager(ItemManager itemManager, AbilityCommonConfigs abilityCommonConfigs) {
         this.itemManager = itemManager;
@@ -97,28 +110,43 @@ public final class HullConfigManager {
     }
 
     private HullConfig read(String shipName) {
-        final HullConfig.Data configData = new HullConfig.Data();
+        HullConfig.Data configData = new HullConfig.Data();
 
-        configData.internalName = shipName;
+        if (configData.hasTex) {
+            HullConfig.DataWithTex newConfigData = new HullConfig.DataWithTex();
 
-        Json json = Assets.getJson(shipName);
+            newConfigData.internalName = shipName;
+            logger.info(shipName);
+            newConfigData.icon = Assets.getAtlasRegion(shipName + "Icon");
+            Json json = Assets.getJson(shipName);
+            try {
+                readProperties(json.getJsonValue(), newConfigData);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("The JSON of ship " + shipName + " is missing, or has malformed, a required parameter" + e.getMessage().split(":")[1]);
+            } catch (SerializationException e) {
+                throw new SerializationException("The JSON of ship " + shipName + " has invalid syntax at " + e.getMessage().split(" near")[0].split("on ")[1]);
+            }
+            validateEngineConfig(newConfigData);
+            json.dispose();
+            return new HullConfig(newConfigData);
+        } else {
+            HullConfig.DataWithAnim newConfigData = new HullConfig.DataWithAnim();
 
-        try {
-            readProperties(json.getJsonValue(), configData);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("The JSON of ship " + shipName + " is missing, or has malformed, a required parameter" + e.getMessage().split(":")[1]);
-        } catch (SerializationException e) {
-            throw new SerializationException("The JSON of ship " + shipName + " has invalid syntax at " + e.getMessage().split(" near")[0].split("on ")[1]);
+            logger.info(shipName);
+            newConfigData.internalName = shipName;
+            newConfigData.icon = Assets.getAtlasRegion(shipName + "Icon");
+            Json json = Assets.getJson(shipName);
+            try {
+                readProperties(json.getJsonValue(), newConfigData);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("The JSON of ship " + shipName + " is missing, or has malformed, a required parameter" + e.getMessage().split(":")[1]);
+            } catch (SerializationException e) {
+                throw new SerializationException("The JSON of ship " + shipName + " has invalid syntax at " + e.getMessage().split(" near")[0].split("on ")[1]);
+            }
+            validateEngineConfig(newConfigData);
+            json.dispose();
+            return new HullConfig(newConfigData);
         }
-
-        configData.tex = Assets.getAtlasRegion(shipName);
-        configData.icon = Assets.getAtlasRegion(shipName + "Icon");
-
-        validateEngineConfig(configData);
-
-        json.dispose();
-
-        return new HullConfig(configData);
     }
 
     private void parseGunSlotList(JsonValue containerNode, HullConfig.Data configData) {
@@ -155,11 +183,27 @@ public final class HullConfigManager {
             configData.particleEmitters.add(new DSParticleEmitter(position, trigger, angleOffset, hasLight, particleNode, workSounds));
         }
     }
-
+    private void readProperties(JsonValue rootNode, HullConfig.DataWithAnim configData) {
+        Gson gson= new Gson();
+        if (rootNode.get("textures") != null) {
+            configData.textures = new ArrayList<Texture>();
+            for (int i=0; i<rootNode.get("textures").asStringArray().length; i++) {
+                JsonValue val = rootNode.get("textures").iterator().next();
+                logger.info("val: "+val);
+                logger.info(Assets.getDSTexture(val.toString()).toString());
+                configData.textures.add(Assets.getDSTexture(val.toString()).getTexture());
+            }
+        }
+        mainReadProperties(rootNode, configData);
+    }
     private void readProperties(JsonValue rootNode, HullConfig.Data configData) {
+        mainReadProperties(rootNode, configData);
+    }
+    private void mainReadProperties(JsonValue rootNode, HullConfig.Data configData) {
         configData.size = rootNode.getFloat("size");
         configData.approxRadius = 0.4f * configData.size;
         configData.maxLife = rootNode.getInt("maxLife");
+
 
         configData.lightSrcPoss = SolMath.readV2List(rootNode, "lightSrcPoss");
         configData.hasBase = rootNode.getBoolean("hasBase", false);

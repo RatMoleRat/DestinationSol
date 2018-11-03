@@ -16,6 +16,7 @@
 package org.destinationsol.game.ship;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -55,6 +56,8 @@ import org.destinationsol.game.item.TradeContainer;
 import org.destinationsol.game.particle.LightSource;
 import org.destinationsol.game.ship.hulls.Hull;
 import org.destinationsol.game.ship.hulls.HullConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +66,7 @@ public class ShipBuilder {
     public static final float SHIP_DENSITY = 3f;
     public static final float AVG_BATTLE_TIME = 30f;
     public static final float AVG_ALLY_LIFE_TIME = 75f;
+    public static final Logger logger = LoggerFactory.getLogger(ShipBuilder.class);
 
     private final CollisionMeshLoader myCollisionMeshLoader;
 
@@ -271,8 +275,18 @@ public class ShipBuilder {
 
         BodyDef.BodyType bodyType = hullConfig.getType() == HullConfig.Type.STATION ? BodyDef.BodyType.KinematicBody : BodyDef.BodyType.DynamicBody;
         DrawableLevel level = hullConfig.getType() == HullConfig.Type.STD ? DrawableLevel.BODIES : hullConfig.getType() == HullConfig.Type.BIG ? DrawableLevel.BIG_BODIES : DrawableLevel.STATIONS;
-        Body body = myCollisionMeshLoader.getBodyAndSprite(game, hullConfig, hullConfig.getSize(), bodyType, position, angle,
-                drawables, SHIP_DENSITY, level, hullConfig.getTexture());
+        Body body;
+        try {
+            body = myCollisionMeshLoader.getBodyAndSprite(game, hullConfig, hullConfig.getSize(), bodyType, position, angle,
+                    drawables, SHIP_DENSITY, level, hullConfig.getTexture());
+        } catch(NullPointerException e) {
+            TextureRegion textureRegion = new TextureRegion();
+            textureRegion.setRegion(hullConfig.getTextures().get(0));
+            TextureAtlas.AtlasRegion textureAtlas = new TextureAtlas().addRegion(hullConfig.getTextures().get(0).toString(),textureRegion);
+            logger.info("type of getTextures: "+hullConfig.getTextures().get(0).getClass());
+            body = myCollisionMeshLoader.getBodyAndSprite(game, hullConfig, hullConfig.getSize(), bodyType, position, angle,
+                    drawables, SHIP_DENSITY, level, textureAtlas);
+        }
         Fixture shieldFixture = createShieldFixture(hullConfig, body);
 
         GunMount gunMount0 = new GunMount(hullConfig.getGunSlot(0));

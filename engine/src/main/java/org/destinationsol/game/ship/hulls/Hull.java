@@ -16,6 +16,8 @@
 
 package org.destinationsol.game.ship.hulls;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -24,6 +26,7 @@ import org.destinationsol.common.SolMath;
 import org.destinationsol.game.Faction;
 import org.destinationsol.game.SolCam;
 import org.destinationsol.game.SolGame;
+import org.destinationsol.game.SpriteManager;
 import org.destinationsol.game.drawables.Drawable;
 import org.destinationsol.game.gun.GunMount;
 import org.destinationsol.game.input.Pilot;
@@ -66,6 +69,19 @@ public class Hull {
                 List<LightSource> lightSources, float life, ArrayList<ForceBeacon> forceBeacons,
                 ArrayList<Door> doors, Fixture shieldFixture) {
         config = hullConfig;
+
+        ArrayList<Texture> textures = config.getTextures();
+
+        if (textures != null) {
+            String[] texNames = new String[textures.size()];
+            Texture[] tex = new Texture[textures.size()];
+            for (int i=0; i<textures.size(); i++) {
+                texNames[i] = textures.get(i).toString();
+                tex[i] = textures.get(i);
+            }
+            SpriteManager spriteManager = new SpriteManager(tex, texNames);
+        }
+
         this.body = body;
         this.gunMount1 = gunMount1;
         this.gunMount2 = gunMount2;

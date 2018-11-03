@@ -16,6 +16,7 @@
 package org.destinationsol.game.projectile;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -23,13 +24,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import org.destinationsol.common.SolColor;
 import org.destinationsol.common.SolMath;
 import org.destinationsol.common.SolRandom;
-import org.destinationsol.game.DmgType;
-import org.destinationsol.game.Faction;
-import org.destinationsol.game.FactionManager;
-import org.destinationsol.game.FarObject;
-import org.destinationsol.game.GameDrawer;
-import org.destinationsol.game.SolGame;
-import org.destinationsol.game.SolObject;
+import org.destinationsol.game.*;
 import org.destinationsol.game.drawables.Drawable;
 import org.destinationsol.game.drawables.DrawableLevel;
 import org.destinationsol.game.drawables.RectSprite;
@@ -59,6 +54,7 @@ public class Projectile implements SolObject {
 
     public Projectile(SolGame game, float angle, Vector2 muzzlePos, Vector2 gunSpeed, Faction faction,
                       ProjectileConfig config, boolean varySpeed) {
+
         drawables = new ArrayList<>();
         this.config = config;
 

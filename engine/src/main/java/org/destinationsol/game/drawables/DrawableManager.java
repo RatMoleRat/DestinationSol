@@ -16,6 +16,7 @@
 
 package org.destinationsol.game.drawables;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -23,13 +24,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.OrderedMap;
 import org.destinationsol.common.DebugCol;
-import org.destinationsol.game.DebugOptions;
-import org.destinationsol.game.GameDrawer;
-import org.destinationsol.game.MapDrawer;
-import org.destinationsol.game.ObjectManager;
-import org.destinationsol.game.SolCam;
-import org.destinationsol.game.SolGame;
-import org.destinationsol.game.SolObject;
+import org.destinationsol.game.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,12 +35,17 @@ import java.util.List;
 import java.util.Set;
 
 public class DrawableManager {
+    private static final Logger logger = LoggerFactory.getLogger(DrawableManager.class);
     private final DrawableLevel[] drawableLevels;
     private final ArrayList<OrderedMap<Texture, List<Drawable>>> drawables;
     private final Set<Drawable> visibleDrawables = new HashSet<>();
     private final GameDrawer drawer;
+    public ArrayList<SpriteManager> managers;
+    public ArrayList<String[]> manNames;
 
     public DrawableManager(GameDrawer drawer) {
+        managers = new ArrayList<>();
+        manNames = new ArrayList<>();
         drawableLevels = DrawableLevel.values();
         this.drawer = drawer;
         drawables = new ArrayList<>();
@@ -92,6 +94,26 @@ public class DrawableManager {
             DrawableLevel level = drawable.getLevel();
             OrderedMap<Texture, List<Drawable>> map = this.drawables.get(level.ordinal());
             Texture texture = drawable.getTexture().getTexture();
+
+            for (int i=0; i<manNames.size(); i++) {
+                for (String name : manNames.get(i)) {
+                    logger.info("texture name: "+texture.toString());
+                    int managerIndex = manNames.indexOf(texture.toString());
+                    if (managerIndex != -1) {
+                        logger.info("texture name found.");
+                        SpriteManager manager = managers.get(managerIndex);
+                        if (manager.toPlay) {
+                            logger.info("playing");
+                            manager.time += Gdx.graphics.getDeltaTime();
+                            texture = manager.animation.getKeyFrame(manager.time, true).getTexture();
+                        } else {
+                            logger.info("no longer playing");
+                            texture = manager.animation.getKeyFrame(manager.time, true).getTexture();
+                        }
+                    }
+                }
+            }
+
             List<Drawable> set = map.get(texture);
             if (set == null) {
                 set = new ArrayList<>();
@@ -100,6 +122,7 @@ public class DrawableManager {
             if (set.contains(drawable)) {
                 continue;
             }
+
             set.add(drawable);
             visibleDrawables.remove(drawable);
         }

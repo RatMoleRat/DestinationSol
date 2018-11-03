@@ -21,11 +21,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import org.destinationsol.common.SolMath;
 import org.destinationsol.common.SolRandom;
-import org.destinationsol.game.DmgType;
-import org.destinationsol.game.FarObject;
-import org.destinationsol.game.RemoveController;
-import org.destinationsol.game.SolGame;
-import org.destinationsol.game.SolObject;
+import org.destinationsol.game.*;
 import org.destinationsol.game.drawables.Drawable;
 import org.destinationsol.game.item.Loot;
 import org.destinationsol.game.item.MoneyItem;
@@ -38,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Asteroid implements SolObject {
+
     private static final float MIN_SPLIT_SZ = .25f;
     private static final float MIN_BURN_SZ = .3f;
     private static final float SZ_TO_LIFE = 20f;
@@ -54,6 +51,7 @@ public class Asteroid implements SolObject {
     private final DSParticleEmitter smokeSource;
     private final DSParticleEmitter fireSource;
     private final float mass;
+    private boolean animated;
 
     private float angle;
     private float life;
@@ -77,6 +75,7 @@ public class Asteroid implements SolObject {
         this.drawables.addAll(fireSource.getDrawables());
     }
 
+    public boolean getAnimated() { return animated; }
     @Override
     public Vector2 getPosition() {
         return position;

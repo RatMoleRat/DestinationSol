@@ -143,7 +143,6 @@ public class Planet {
         SolMath.free(up);
         return r;
     }
-
     public float getGravitationConstant() {
         return gravitationConstant;
     }
